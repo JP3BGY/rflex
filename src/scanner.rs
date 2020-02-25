@@ -444,12 +444,15 @@ impl<'a, 'b> RegexScanner<'a, 'b> {
                     };
                     let mut str_capture = String::new();
                     loop {
-                        str_capture.push(
-                            match chars.next().ok_or(CharClassParseError::LiteralError)? {
+                        let ch = match chars.next().ok_or(CharClassParseError::LiteralError)? {
+                                '\\' => {
+                                    str_capture.push('\\');
+                                    chars.next().ok_or(CharClassParseError::LiteralError)? 
+                                }
                                 ']' => break,
                                 ch => ch,
-                            },
-                        )
+                            };
+                        str_capture.push(ch);
                     }
                     let v: Vec<Interval> = convert_char_class(str_capture)?;
                     self.char_classes.make_class_intervals(v.clone(), false);
